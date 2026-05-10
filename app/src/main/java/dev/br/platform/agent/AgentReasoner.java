@@ -1,13 +1,13 @@
 package dev.br.platform.agent;
 
-import dev.br.platform.events.AgentEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
-public class AgentReasoner {
+public class AgentReasoner implements Reasoner {
 
+    @Override
     public AgentDecision decide(Map<String, Object> enrichedEvent) {
 
         String type = (String) enrichedEvent.get("type");
