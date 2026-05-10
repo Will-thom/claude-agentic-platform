@@ -1,0 +1,39 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+*.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+
+# Spring Boot
+application-local.yml
+application-dev.yml
+
+# Logs
+logs/
+*.log
+
+# Maven wrapper temp
+.mvn/wrapper/maven-wrapper.jar
+
+# Env files
+.env
+.env.*
+
+# Docker
+**/docker-data/
