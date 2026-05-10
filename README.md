@@ -792,3 +792,132 @@ claude-agentic-platform>docker exec -it claude-agentic-postgres psql -U agentic 
 (7 rows)
 
 
+
+
+```
+## 🔀 Phase 8: Reasoning Strategy Router (Rules vs Claude Switch)
+
+The system now introduces a **dynamic reasoning strategy layer**, allowing runtime switching between rule-based logic and simulated AI reasoning.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Reasoner Router (Strategy Selector)
+├── AgentReasoner (Rule-based)
+└── ClaudeReasoner (Simulated LLM)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+````
+
+---
+
+## 🧠 Purpose of the Reasoner Router
+
+The `ReasonerRouter` introduces a **strategy selection layer** that decouples decision-making from execution, enabling:
+
+- Runtime switching between reasoning engines
+- Separation of deterministic and AI-like logic
+- Flexible experimentation with different decision strategies
+- Foundation for future real LLM integration (Claude API)
+
+---
+
+## 📦 Current Implementation
+
+### `ReasonerRouter`
+
+Acts as the central decision dispatcher:
+
+- Reads configuration from `application.yml`
+- Routes events to the appropriate reasoning engine:
+  - `RULES` → deterministic `AgentReasoner`
+  - `CLAUDE` → simulated `ClaudeReasoner`
+- Implements the `Reasoner` interface to remain transparent to the pipeline
+
+---
+
+## ⚙️ Configuration-Driven Behavior
+
+Reasoning strategy is now externally configurable:
+
+```yaml
+agent:
+  reasoning:
+    mode: RULES
+````
+
+Supported modes:
+
+* `RULES` → rule-based deterministic logic
+* `CLAUDE` → simulated LLM reasoning engine
+
+---
+
+## 🧠 Design Intent
+
+This phase introduces a **strategy pattern applied to AI reasoning**, enabling:
+
+* Runtime behavior switching without code changes
+* Safe comparison between rule-based and AI-like outputs
+* Clear separation between infrastructure and decision logic
+* Preparation for real LLM integration
+
+---
+
+## 🚀 Architectural Direction
+
+The system is now structured to support multiple reasoning backends:
+
+* Deterministic rules engine
+* Simulated LLM engine
+* Future Claude API integration
+
+This establishes a foundation for:
+
+* A/B testing of reasoning strategies
+* Hybrid AI + rules systems
+* Full agent-based decision architecture
+
+```
+
+Visualizing data inside DB docker container (Phase 8):
+
+
+docker compose down
+docker compose up --build
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ROUTER_TEST\",\"message\":\"testing reasoning switch\"}"
+
+{"id":8,"eventType":"ROUTER_TEST","message":"testing reasoning switch","createdAt":"2026-05-10T20:39:33.996948883"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+
+ id |         created_at         |   event_type   |              message
+----+----------------------------+----------------+-----------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT           | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST   | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST  | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST    | testing enrichment layer
+  5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST    | testing reasoning layer
+  6 | 2026-05-10 20:14:13.206004 | REASONING_TEST | testing abstraction layer
+  7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
+  8 | 2026-05-10 20:39:33.996949 | ROUTER_TEST    | testing reasoning switch
+(8 rows)

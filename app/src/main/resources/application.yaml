@@ -1,3 +1,7 @@
 spring:
   application:
     name: claude-agentic-platform
+
+agent:
+  reasoning:
+    mode: RULES
