@@ -5,6 +5,7 @@ spring:
 agent:
   reasoning:
     mode: RULES
+    confidence-threshold: 0.8
 
 claude:
   api:

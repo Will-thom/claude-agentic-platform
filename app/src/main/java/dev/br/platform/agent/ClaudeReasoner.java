@@ -25,7 +25,9 @@ public class ClaudeReasoner implements Reasoner {
 
         return new AgentDecision(
                 llmDecision.getAction(),
-                llmDecision.getReason()
+                llmDecision.getReason(),
+                "CLAUDE",
+                llmDecision.getConfidence()
         );
     }
 
@@ -62,8 +64,14 @@ public class ClaudeReasoner implements Reasoner {
 
         try {
             return objectMapper.readValue(response, LLMDecision.class);
+
         } catch (Exception e) {
-            return new LLMDecision("ERROR", "Failed to parse LLM response", 0.0);
+
+            return new LLMDecision(
+                    "ERROR",
+                    "Failed to parse LLM response",
+                    0.0
+            );
         }
     }
 }

@@ -107,7 +107,7 @@ This ensures that when AI agents are introduced into the development loop, they 
 
 ```
 
-Visualizing data inside DB docker container (Phase 1):
+End-to-end Test -  DB docker container (Phase 1):
 
 
 Complete Rebuild:
@@ -135,7 +135,7 @@ Resonse awaited:
 }
 
 
-Visualizing data inside DB docker container:
+End-to-end Test -  DB docker container:
 
 
 docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db
@@ -215,7 +215,7 @@ This ensures the system remains:
 ```
 
 
-Visualizing data inside DB docker container (Phase 2):
+End-to-end Test -  DB docker container (Phase 2):
 
 docker compose down
 docker compose up --build
@@ -313,7 +313,7 @@ Future enhancements will include:
 - Event routing strategies
 ```
 
-Visualizing data inside DB docker container (Phase 3):
+End-to-end Test -  DB docker container (Phase 3):
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"PIPELINE_TEST\",\"message\":\"testing event pipeline layer\"}"
 
@@ -400,7 +400,7 @@ Future evolution will introduce:
 ```
 
 
-Visualizing data inside DB docker container (Phase 4):
+End-to-end Test -  DB docker container (Phase 4):
 
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing enrichment layer\"}"
@@ -517,7 +517,7 @@ Future evolution will replace or augment the `AgentReasoner` with:
 ```
 
 
-Visualizing data inside DB docker container (Phase 5):
+End-to-end Test -  DB docker container (Phase 5):
 
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing reasoning layer\"}"
@@ -635,7 +635,7 @@ Future evolution will introduce:
 ```
 
 
-Visualizing data inside DB docker container (Phase 6):
+End-to-end Test -  DB docker container (Phase 6):
 
 docker compose down
 docker compose up --build
@@ -766,7 +766,7 @@ Future evolution will include:
 ```
 
 
-Visualizing data inside DB docker container (Phase 7):
+End-to-end Test -  DB docker container (Phase 7):
 
 
 docker compose down
@@ -896,7 +896,7 @@ This establishes a foundation for:
 
 ```
 
-Visualizing data inside DB docker container (Phase 8):
+End-to-end Test -  DB docker container (Phase 8):
 
 
 docker compose down
@@ -1145,3 +1145,163 @@ This approach establishes a more robust foundation for future:
 
 ```
 ```
+
+## 🧠 Phase 9: Hybrid Reasoning Layer
+
+This phase introduces the platform's first **hybrid intelligence orchestration layer**, enabling the system to govern AI decisions instead of blindly trusting them.
+
+The architecture now supports:
+
+- confidence-based AI arbitration
+- fallback strategies
+- reasoning source tracking
+- hybrid rule/AI decision flow
+
+This marks the transition from:
+
+> simple LLM consumption
+
+to:
+
+> intelligence orchestration and governance
+
+---
+
+## 🧭 Hybrid Reasoning Flow
+
+```
+
+Enriched Event
+↓
+ReasonerRouter
+↓
+ClaudeReasoner
+↓
+confidence >= threshold ?
+├── YES → accept AI decision
+└── NO  → fallback to AgentReasoner
+
+````
+
+---
+
+## ⚙️ Confidence-Based Arbitration
+
+The platform now evaluates AI confidence before accepting a decision.
+
+### Example
+
+```
+confidence >= 0.8
+→ accept Claude reasoning
+
+confidence < 0.8
+→ fallback to deterministic rules
+````
+
+This introduces operational safety and prepares the system for real-world AI governance scenarios.
+
+---
+
+## 📦 Architectural Changes
+
+### `AgentDecision` evolved
+
+The decision model now contains:
+
+* `action`
+* `reason`
+* `source`
+* `confidence`
+
+This allows the platform to trace:
+
+* where decisions originated
+* how reliable they are
+* whether fallback was triggered
+
+---
+
+### `ReasonerRouter` upgraded
+
+The router now acts as an:
+
+> intelligence arbitration engine
+
+Responsibilities include:
+
+* selecting reasoning strategy
+* evaluating AI confidence
+* triggering fallback logic
+* returning unified decisions
+
+---
+
+### `ClaudeReasoner` evolved
+
+The LLM reasoning layer now:
+
+* produces structured decisions
+* exposes confidence levels
+* integrates with arbitration flow
+
+---
+
+### `AgentReasoner` remains deterministic
+
+The rule-based reasoner now acts as:
+
+* deterministic fallback
+* operational safety layer
+* governance baseline
+
+---
+
+## 🧠 Strategic Importance
+
+This phase establishes the foundation for:
+
+* production-grade AI governance
+* safe LLM adoption
+* explainable reasoning systems
+* hybrid intelligence architectures
+
+The platform no longer treats AI as an isolated service call, but rather as one reasoning strategy within a governed decision ecosystem.
+
+---
+
+## 🚀 Future Evolution
+
+Next planned capabilities include:
+
+* reasoning trace persistence
+* structured observability
+* AI execution metrics
+* decision audit trails
+* adaptive confidence thresholds
+* multi-agent orchestration
+
+
+````
+End-to-end Test -  DB docker container (Phase 9):
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"HYBRID_TEST\",\"message\":\"testing hybrid reasoning arbitration\"}"
+
+{"id":9,"eventType":"HYBRID_TEST","message":"testing hybrid reasoning arbitration","createdAt":"2026-05-10T21:55:28.346906968"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+
+ id |         created_at         |   event_type   |               message
+----+----------------------------+----------------+--------------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT           | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST   | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST  | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST    | testing enrichment layer
+  5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST    | testing reasoning layer
+  6 | 2026-05-10 20:14:13.206004 | REASONING_TEST | testing abstraction layer
+  7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
+  8 | 2026-05-10 20:39:33.996949 | ROUTER_TEST    | testing reasoning switch
+  9 | 2026-05-10 21:55:28.346907 | HYBRID_TEST    | testing hybrid reasoning arbitration
+(9 rows)
+````
