@@ -1,21 +1,28 @@
 package dev.br.platform.controller;
 
 import dev.br.platform.domain.EventLog;
-import dev.br.platform.service.EventLogService;
+import dev.br.platform.events.AgentEvent;
+import dev.br.platform.events.EventPipeline;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/events")
 public class EventLogController {
 
-    private final EventLogService service;
+    private final EventPipeline pipeline;
 
-    public EventLogController(EventLogService service) {
-        this.service = service;
+    public EventLogController(EventPipeline pipeline) {
+        this.pipeline = pipeline;
     }
 
     @PostMapping
     public EventLog create(@RequestBody EventLog event) {
-        return service.create(event.getEventType(), event.getMessage());
+
+        AgentEvent agentEvent = new AgentEvent(
+                event.getEventType(),
+                event.getMessage()
+        );
+
+        return pipeline.process(agentEvent);
     }
 }

@@ -237,3 +237,83 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
 
 
 
+```
+## ⚙️ Phase 3: Event Pipeline Introduction (Agentic Foundation)
+
+The architecture has evolved to introduce an **Event Pipeline layer**, marking the first step toward an agent-ready system design.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Event Abstraction Layer)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Why the Event Pipeline exists
+
+The Event Pipeline was introduced to:
+
+- Decouple API input from business logic execution
+- Normalize incoming requests into structured internal events
+- Create a dedicated interception layer for future AI/agent processing
+- Enable event enrichment and routing in later stages
+
+This is a foundational step toward an **agentic architecture**, where system behavior can evolve beyond static CRUD operations.
+
+---
+
+## 📦 Current Implementation
+
+### `AgentEvent`
+A lightweight internal event model used to represent incoming requests in a structured format:
+
+- `type`: event classification
+- `payload`: raw event data
+
+---
+
+### `EventPipeline`
+A central processing component responsible for:
+
+- Receiving structured events
+- Delegating persistence to the service layer
+- Acting as the future integration point for:
+  - AI reasoning (Claude integration)
+  - Event routing
+  - Conditional processing flows
+
+---
+
+## 🧠 Design Intent
+
+The Event Pipeline is intentionally simple at this stage, but designed as an **extensibility boundary**.
+
+Future enhancements will include:
+
+- Event enrichment (metadata injection)
+- AI-driven decision hooks (Claude integration)
+- Async event processing
+- Event routing strategies
+```
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"PIPELINE_TEST\",\"message\":\"testing event pipeline layer\"}"
+
+{"id":3,"eventType":"PIPELINE_TEST","message":"testing event pipeline layer","createdAt":"2026-05-10T19:35:27.744700292"}
+
+
