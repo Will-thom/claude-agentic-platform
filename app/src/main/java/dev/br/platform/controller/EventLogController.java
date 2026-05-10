@@ -1,23 +1,21 @@
 package dev.br.platform.controller;
 
 import dev.br.platform.domain.EventLog;
-import dev.br.platform.repository.EventLogRepository;
+import dev.br.platform.service.EventLogService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/events")
 public class EventLogController {
 
-    private final EventLogRepository repository;
+    private final EventLogService service;
 
-    public EventLogController(EventLogRepository repository) {
-        this.repository = repository;
+    public EventLogController(EventLogService service) {
+        this.service = service;
     }
 
     @PostMapping
     public EventLog create(@RequestBody EventLog event) {
-        return repository.save(
-            new EventLog(event.getEventType(), event.getMessage())
-        );
+        return service.create(event.getEventType(), event.getMessage());
     }
 }

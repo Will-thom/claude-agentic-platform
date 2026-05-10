@@ -153,3 +153,87 @@ select * from event_logs;
 ----+----------------------------+------------+--------------------------------
   1 | 2026-05-10 19:00:28.017114 | INIT       | first event stored in postgres
 (1 row)
+
+
+
+
+```
+## 🧱 Current Architecture Evolution (Phase 2)
+
+The project has now evolved from a direct Controller → Repository flow into a structured service-based architecture.
+
+### 📌 New Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Service Layer Introduction
+
+A dedicated service layer was introduced to:
+
+- Isolate business logic from controllers
+- Prepare the system for event-driven processing
+- Enable future integration with AI/agent workflows (Claude-based processing)
+- Improve testability and maintainability
+
+### 📦 Current Service
+
+- `EventLogService`
+  - Responsible for creating and managing event logs
+  - Encapsulates persistence logic
+  - Acts as foundation for future event pipeline design
+
+---
+
+## 🚀 Design Direction
+
+This layer is intentionally introduced as a **preparation stage for an agentic architecture**, where:
+
+- Events will be processed beyond simple persistence
+- Logs will evolve into structured “agent-readable events”
+- AI hooks (Claude integration) will be introduced on top of the service layer
+
+This ensures the system remains:
+- Simple at the core
+- Extensible for AI-driven workflows
+- Cleanly separated by responsibility
+```
+
+
+Visualizing data inside DB docker container: (Phase 2)
+
+docker compose down
+docker compose up --build
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"SERVICE_TEST\",\"message\":\"testing service layer integration\"}"
+
+{
+  "id": 2,
+  "eventType": "SERVICE_TEST",
+  "message": "testing service layer integration",
+  "createdAt": "..."
+}
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+
+ id |         created_at         |  event_type  |              message
+----+----------------------------+--------------+-----------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT         | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST | testing service layer integration
+(2 rows)
+
+
+
