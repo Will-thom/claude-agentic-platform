@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+
+  app:
+    build:
+      context: ./app
+    container_name: claude-agentic-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/agentic_db
+      SPRING_DATASOURCE_USERNAME: agentic
+      SPRING_DATASOURCE_PASSWORD: agentic
+
+  postgres:
+    image: postgres:16
+    container_name: claude-agentic-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: agentic_db
+      POSTGRES_USER: agentic
+      POSTGRES_PASSWORD: agentic
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
