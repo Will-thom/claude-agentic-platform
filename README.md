@@ -62,3 +62,20 @@ Focus areas:
 * Incremental AI-driven evolution
 
 ```
+
+
+Complete Rebuild:
+
+mvn clean package -DskipTests
+docker compose down
+docker compose build --no-cache
+docker compose up
+
+Testable URL´s until this moment:
+
+http://localhost:18080/hello
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"INIT\",\"message\":\"first event stored in postgres\"}"
+
+
+
