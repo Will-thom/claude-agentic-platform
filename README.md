@@ -658,3 +658,137 @@ claude-agentic-platform>docker exec -it claude-agentic-postgres psql -U agentic 
   5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST    | testing reasoning layer
   6 | 2026-05-10 20:14:13.206004 | REASONING_TEST | testing abstraction layer
 (6 rows)
+
+
+
+
+```
+## 🤖 Phase 7: Claude Reasoner (Simulated LLM Integration)
+
+The system now introduces a **simulated LLM-based reasoning layer**, representing the first step toward real AI-driven decision making within the event pipeline.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Reasoner (Pluggable Decision Layer)
+├── AgentReasoner (Rule-based)
+└── ClaudeReasoner (Simulated LLM)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Purpose of the Claude Reasoner
+
+The `ClaudeReasoner` introduces a **mock LLM behavior layer** that simulates how a real AI model would:
+
+- Interpret enriched event data
+- Apply reasoning based on context
+- Return structured decisions
+- Separate “thinking” from execution logic
+
+---
+
+## 📦 Current Implementation
+
+### `ClaudeReasoner`
+
+A simulated LLM-based decision engine that:
+
+- Mimics prompt-based reasoning flow
+- Generates structured responses in a pseudo LLM format
+- Parses AI-like output into `AgentDecision`
+- Acts as a placeholder for real Claude API integration
+
+---
+
+## 🧪 Simulated LLM Flow
+
+The reasoning process is modeled as:
+
+```
+
+Enriched Event → Simulated Prompt → LLM-like Response → Parsed Decision
+
+```
+
+Example output format:
+
+```
+
+ACTION=ALERT;REASON=LLM detected critical failure pattern
+
+```
+
+---
+
+## ⚙️ Design Intent
+
+This phase introduces a **realistic abstraction of LLM integration**, enabling:
+
+- Safe simulation of AI behavior without external dependencies
+- Validation of future Claude API integration patterns
+- Separation between deterministic logic and probabilistic reasoning
+- Early design of prompt → response → parsing pipeline
+
+---
+
+## 🧠 Architectural Direction
+
+The system is now prepared for true AI integration, where:
+
+- Rule-based and AI-based reasoning coexist
+- Reasoning strategy can be switched or extended
+- Claude API will replace simulated logic without changing pipeline structure
+
+Future evolution will include:
+
+- Real Claude API integration
+- Prompt engineering layer
+- Dynamic reasoning strategy selection (AI vs rules vs hybrid)
+```
+
+
+Visualizing data inside DB docker container (Phase 7):
+
+
+docker compose down
+docker compose up --build
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"REASONING_TEST\",\"message\":\"testing claude simulation\"}"
+
+{"id":7,"eventType":"REASONING_TEST","message":"testing claude simulation","createdAt":"2026-05-10T20:25:41.714922364"}
+
+
+claude-agentic-platform>docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+ 
+ id |         created_at         |   event_type   |              message
+----+----------------------------+----------------+-----------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT           | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST   | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST  | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST    | testing enrichment layer
+  5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST    | testing reasoning layer
+  6 | 2026-05-10 20:14:13.206004 | REASONING_TEST | testing abstraction layer
+  7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
+(7 rows)
+
+
