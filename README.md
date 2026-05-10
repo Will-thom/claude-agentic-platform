@@ -107,6 +107,8 @@ This ensures that when AI agents are introduced into the development loop, they 
 
 ```
 
+Visualizing data inside DB docker container (Phase 1):
+
 
 Complete Rebuild:
 
@@ -213,7 +215,7 @@ This ensures the system remains:
 ```
 
 
-Visualizing data inside DB docker container: (Phase 2)
+Visualizing data inside DB docker container (Phase 2):
 
 docker compose down
 docker compose up --build
@@ -311,9 +313,107 @@ Future enhancements will include:
 - Event routing strategies
 ```
 
+Visualizing data inside DB docker container (Phase 3):
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"PIPELINE_TEST\",\"message\":\"testing event pipeline layer\"}"
 
 {"id":3,"eventType":"PIPELINE_TEST","message":"testing event pipeline layer","createdAt":"2026-05-10T19:35:27.744700292"}
 
 
+
+```
+## 🧠 Phase 4: Event Enrichment Layer (Pre-Agentic Intelligence)
+
+The system has evolved to introduce an **Event Enrichment layer**, marking a key step toward intelligent and context-aware event processing.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+---
+
+## 🧠 Purpose of the Enrichment Layer
+
+The Event Enricher introduces a structured transformation step before persistence, enabling:
+
+- Standardization of incoming events
+- Addition of system metadata (timestamps, source identification)
+- Preparation of data for future AI/agent reasoning
+- Separation between raw input and processed event state
+
+---
+
+## 📦 Current Implementation
+
+### `EventEnricher`
+
+Responsible for enriching raw `AgentEvent` objects with contextual metadata:
+
+- `type` → event classification
+- `payload` → original event data
+- `timestamp` → system-generated event time
+- `source` → origin system identifier
+
+---
+
+## ⚙️ Design Intent
+
+This layer establishes a foundation for:
+
+- Event normalization before persistence
+- Future integration with AI reasoning layers (Claude integration point)
+- Advanced event routing and transformation
+- Transition from CRUD-based architecture to event-driven intelligence
+
+---
+
+## 🧠 Architectural Direction
+
+This phase moves the system closer to an **agent-ready architecture**, where:
+
+- Events are no longer raw inputs
+- Data carries structured context
+- Processing layers can evolve independently
+- AI systems can later reason over enriched event data
+
+Future evolution will introduce:
+- Structured JSON event storage
+- Decision-making layer (agent reasoning)
+- AI-driven event classification and routing
+```
+
+
+Visualizing data inside DB docker container (Phase 4):
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing enrichment layer\"}"
+
+{"id":4,"eventType":"ENRICH_TEST","message":"testing enrichment layer","createdAt":"2026-05-10T19:43:38.738173402"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+ 
+ id |         created_at         |  event_type   |              message
+----+----------------------------+---------------+-----------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT          | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST  | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST   | testing enrichment layer
+(4 rows)
