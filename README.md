@@ -921,3 +921,102 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
   7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
   8 | 2026-05-10 20:39:33.996949 | ROUTER_TEST    | testing reasoning switch
 (8 rows)
+
+
+
+
+```
+## 🧠 Phase 9: Structured LLM Output (JSON-Based Reasoning)
+
+The system has evolved from string-based LLM responses to a **fully structured JSON-based reasoning contract**, aligning the architecture with modern LLM integration standards.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Reasoner Router (Strategy Layer)
+├── AgentReasoner (Rule-based)
+└── ClaudeReasoner (LLM-based JSON output)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Purpose of Structured LLM Output
+
+This phase introduces a **contract-based AI response model**, replacing fragile string parsing with structured JSON.
+
+Key improvements:
+
+- Strong typing for AI outputs
+- Safer parsing and error handling
+- Extensible decision schema
+- Foundation for multi-model AI interoperability
+
+---
+
+## 📦 Current Implementation
+
+### `LLMDecision`
+
+A structured model representing LLM output:
+
+- `action` → system decision (STORE, ALERT, IGNORE)
+- `reason` → explanation from the model
+- `confidence` → AI confidence score (0.0 – 1.0)
+
+---
+
+### `ClaudeReasoner` (Updated)
+
+The reasoner now:
+
+- Builds structured prompts instructing JSON-only output
+- Parses LLM responses into `LLMDecision`
+- Converts structured AI output into internal `AgentDecision`
+- Implements safe fallback in case of parsing errors
+
+---
+
+## ⚙️ Design Intent
+
+This phase aligns the system with **production-grade LLM integration patterns**, enabling:
+
+- Reliable AI response handling
+- Clear separation between prompt and contract
+- Safer evolution toward real Claude API usage
+- Multi-model compatibility (future-ready design)
+
+---
+
+## 🧠 Architectural Direction
+
+The system now treats LLM output as a **structured decision contract**, enabling:
+
+- Deterministic handling of AI responses
+- Confidence-based decision logic (future step)
+- Hybrid reasoning systems (rules + AI arbitration)
+- Observability over AI decisions
+
+Future evolution will include:
+
+- Hybrid reasoning layer (rules vs LLM arbitration)
+- Confidence-based routing
+- Real Claude API integration hardening
+```

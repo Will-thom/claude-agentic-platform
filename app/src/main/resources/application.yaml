@@ -5,3 +5,7 @@ spring:
 agent:
   reasoning:
     mode: RULES
+
+claude:
+  api:
+    key: YOUR_API_KEY_HERE
