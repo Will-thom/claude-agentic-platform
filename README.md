@@ -417,3 +417,122 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
   3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST | testing event pipeline layer
   4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST   | testing enrichment layer
 (4 rows)
+
+
+
+```
+## 🧠 Phase 5: Agent Reasoning Layer (Pre-AI Decision Engine)
+
+The system has evolved from structured event processing into a **decision-capable architecture layer**, introducing the first form of “reasoning” inside the pipeline.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Agent Reasoner (Decision Layer)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Purpose of the Reasoning Layer
+
+The Agent Reasoner introduces a **decision-making step** into the system.
+
+Its responsibilities include:
+
+- Evaluating enriched events
+- Determining system actions based on event type and context
+- Producing a structured decision output
+- Preparing the system for future AI-driven reasoning (Claude integration point)
+
+---
+
+## 📦 Current Implementation
+
+### `AgentReasoner`
+
+A rule-based decision engine that classifies events into actions such as:
+
+- `STORE` → persist normally
+- `ALERT` → flag critical events
+- `IGNORE` → discard irrelevant events
+
+This represents a **deterministic reasoning layer**, acting as a placeholder for future LLM-based logic.
+
+---
+
+### `AgentDecision`
+
+A structured output model representing the result of the reasoning process:
+
+- `action` → what the system should do
+- `reason` → why the decision was made
+
+---
+
+## ⚙️ Design Intent
+
+This layer establishes the foundation for transitioning from:
+
+> Rule-based systems → AI-driven reasoning systems
+
+It decouples:
+
+- Event interpretation
+- Decision logic
+- Persistence concerns
+
+---
+
+## 🧠 Architectural Direction
+
+This phase introduces the first step toward an **agentic system architecture**, where:
+
+- Events are interpreted before persistence
+- Decisions are explicit and traceable
+- Logic can later be replaced by AI (Claude integration)
+
+Future evolution will replace or augment the `AgentReasoner` with:
+
+- LLM-based reasoning (Claude)
+- Prompt-driven decision making
+- Structured AI outputs
+```
+
+
+Visualizing data inside DB docker container (Phase 5):
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing reasoning layer\"}"
+
+{"id":5,"eventType":"ENRICH_TEST","message":"testing reasoning layer","createdAt":"2026-05-10T19:58:51.46797532"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+
+ id |         created_at         |  event_type   |              message
+----+----------------------------+---------------+-----------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT          | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST  | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST   | testing enrichment layer
+  5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST   | testing reasoning layer
+(5 rows)
+
