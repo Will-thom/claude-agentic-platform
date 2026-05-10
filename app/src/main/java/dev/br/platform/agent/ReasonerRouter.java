@@ -1,5 +1,7 @@
 package dev.br.platform.agent;
 
+import dev.br.platform.entity.AgentDecisionLog;
+import dev.br.platform.repository.AgentDecisionLogRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +12,7 @@ public class ReasonerRouter implements Reasoner {
 
     private final AgentReasoner agentReasoner;
     private final ClaudeReasoner claudeReasoner;
+    private final AgentDecisionLogRepository repository;
 
     @Value("${agent.reasoning.mode:RULES}")
     private String mode;
@@ -18,43 +21,64 @@ public class ReasonerRouter implements Reasoner {
     private double confidenceThreshold;
 
     public ReasonerRouter(AgentReasoner agentReasoner,
-                          ClaudeReasoner claudeReasoner) {
+                          ClaudeReasoner claudeReasoner,
+                          AgentDecisionLogRepository repository) {
         this.agentReasoner = agentReasoner;
         this.claudeReasoner = claudeReasoner;
+        this.repository = repository;
     }
 
     @Override
     public AgentDecision decide(Map<String, Object> enrichedEvent) {
 
+        long start = System.currentTimeMillis();
+
+        String eventType = (String) enrichedEvent.get("type");
+
+        AgentDecision decision;
+        boolean fallbackUsed = false;
+
         if ("CLAUDE".equalsIgnoreCase(mode)) {
 
-            AgentDecision aiDecision =
-                    claudeReasoner.decide(enrichedEvent);
+            AgentDecision aiDecision = claudeReasoner.decide(enrichedEvent);
 
             if (aiDecision.getConfidence() >= confidenceThreshold) {
-                return aiDecision;
+
+                decision = aiDecision;
+
+            } else {
+
+                fallbackUsed = true;
+
+                AgentDecision fallback = agentReasoner.decide(enrichedEvent);
+
+                decision = new AgentDecision(
+                        fallback.getAction(),
+                        fallback.getReason()
+                                + " | fallback from AI confidence="
+                                + aiDecision.getConfidence(),
+                        "HYBRID_FALLBACK",
+                        fallback.getConfidence()
+                );
             }
 
-            return fallbackDecision(enrichedEvent, aiDecision);
+        } else {
+
+            decision = agentReasoner.decide(enrichedEvent);
         }
 
-        return agentReasoner.decide(enrichedEvent);
-    }
+        long duration = System.currentTimeMillis() - start;
 
-    private AgentDecision fallbackDecision(
-            Map<String, Object> enrichedEvent,
-            AgentDecision aiDecision) {
+        repository.save(new AgentDecisionLog(
+                eventType != null ? eventType : "UNKNOWN",
+                decision.getAction(),
+                decision.getReason(),
+                decision.getSource(),
+                decision.getConfidence(),
+                fallbackUsed,
+                duration
+        ));
 
-        AgentDecision fallback =
-                agentReasoner.decide(enrichedEvent);
-
-        return new AgentDecision(
-                fallback.getAction(),
-                fallback.getReason()
-                        + " | fallback triggered from low AI confidence="
-                        + aiDecision.getConfidence(),
-                "HYBRID_FALLBACK",
-                fallback.getConfidence()
-        );
+        return decision;
     }
 }

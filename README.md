@@ -1305,3 +1305,136 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
   9 | 2026-05-10 21:55:28.346907 | HYBRID_TEST    | testing hybrid reasoning arbitration
 (9 rows)
 ````
+
+
+## 📊 Phase 11: Decision Trace & Observability Layer
+
+This phase introduces a critical capability in the agentic platform: **full decision observability and auditability**.
+
+The system now not only makes decisions, but also **records and explains every reasoning outcome in a persistent audit trail**.
+
+---
+
+## 🧠 Why This Phase Matters
+
+Until this point, the platform was capable of:
+
+- routing events
+- applying rules
+- invoking LLM reasoning (simulated or real-ready)
+- performing fallback between strategies
+
+However, there was no visibility into:
+
+- why a decision was made
+- which strategy was used
+- whether fallback occurred
+- how long reasoning took
+
+This phase solves that gap.
+
+---
+
+## 🧭 New Capability: Decision Audit Trail
+
+Every decision produced by the `ReasonerRouter` is now persisted as a structured log entry.
+
+### Captured Information
+
+Each decision log includes:
+
+- `eventType` → original event classification
+- `action` → final decision (STORE, ALERT, IGNORE, etc.)
+- `reason` → explanation from reasoning layer
+- `source` → RULES, CLAUDE, or HYBRID_FALLBACK
+- `confidence` → AI confidence score (when applicable)
+- `fallbackUsed` → whether fallback logic was triggered
+- `processingTimeMs` → execution latency of reasoning pipeline
+- `createdAt` → timestamp of decision execution
+
+---
+
+## 🏗️ Architectural Impact
+
+### ReasonerRouter Evolution
+
+The `ReasonerRouter` is now responsible for:
+
+- orchestrating reasoning strategy selection
+- applying confidence-based arbitration
+- triggering fallback logic when necessary
+- recording full decision trace into persistence layer
+
+It effectively becomes:
+
+> a **governed intelligence execution engine with observability**
+
+---
+
+### New Persistence Layer
+
+A new entity has been introduced:
+
+- `AgentDecisionLog`
+
+Stored via:
+
+- `AgentDecisionLogRepository`
+
+Backed by PostgreSQL.
+
+---
+
+## 🔁 Updated Flow
+
+```
+
+Enriched Event
+↓
+ReasonerRouter
+↓
+ClaudeReasoner (if enabled)
+↓
+Confidence Evaluation
+↓
+Fallback (if needed)
+↓
+Final Decision
+↓
+Persist Decision Trace (DB)
+↓
+Return Response
+
+```
+
+---
+
+## 🧠 Strategic Value
+
+This phase transforms the system from:
+
+> “a pipeline that makes decisions”
+
+into:
+
+> “a system that can explain, audit, and measure its own intelligence”
+
+Key benefits:
+
+- full reasoning traceability
+- production-grade observability for AI behavior
+- debugging support for hybrid decision systems
+- foundation for AI governance and evaluation metrics
+
+---
+
+## 🚀 Next Evolution Direction
+
+With observability in place, the platform is now ready for:
+
+- Decision analytics (AI vs rules effectiveness)
+- Confidence tuning strategies
+- Behavioral drift detection
+- Real Claude API integration with monitoring
+- Agent performance dashboards
+```
