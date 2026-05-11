@@ -1307,7 +1307,7 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
 ````
 
 
-## 📊 Phase 11: Decision Trace & Observability Layer
+## 📊 Phase 10: Decision Trace & Observability Layer
 
 This phase introduces a critical capability in the agentic platform: **full decision observability and auditability**.
 
@@ -1438,3 +1438,161 @@ With observability in place, the platform is now ready for:
 - Real Claude API integration with monitoring
 - Agent performance dashboards
 ```
+
+
+🧪 TESTE 1 — RULES FLOW 
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ERROR\",\"payload\":\"system failure\"}"
+
+{"id":1,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:13:01.069182697"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs order by id desc;"
+
+ id |         created_at         | event_type |                                                                                      message
+----+----------------------------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | 2026-05-11 13:13:01.069183 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+(1 row)
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from agent_decision_log order by id desc;"
+
+ id | action | confidence |          created_at           | event_type | fallback_used | processing_time_ms |       reason       | source
+----+--------+------------+-------------------------------+------------+---------------+--------------------+--------------------+--------
+  1 | IGNORE |          1 | 2026-05-11 13:13:00.191863+00 | UNKNOWN    | f             |                  2 | No relevant action | RULES
+(1 row)
+
+
+🧪 TESTE 2 — evento normal:
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"NORMAL\",\"payload\":\"regular event\"}"
+
+{"id":2,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:20:10.244106556Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:20:10.492710926"}
+
+
+🧪 TESTE 3 — ENRICH FLOW:
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ENRICH\",\"payload\":\"metadata enrichment\"}"
+
+{"id":3,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:23:25.986338303Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:23:26.182099096"}
+
+
+
+## Phase 10: Hybrid Reasoning Router Stabilization
+
+### Overview
+
+This phase finalized the stabilization of the hybrid reasoning architecture by introducing a centralized routing layer responsible for orchestrating decision strategies across the event pipeline.
+
+The system now supports a clean separation between:
+
+* deterministic rule-based reasoning
+* AI-driven reasoning (Claude integration ready)
+* routing and fallback orchestration
+* decision observability persistence
+
+---
+
+### Architecture Evolution
+
+The reasoning flow is now centralized through a single orchestration component:
+
+```text id="m1"
+EventPipeline
+   ↓
+ReasonerRouter
+   ↓
+AgentReasoner OR ClaudeReasoner
+   ↓
+AgentDecision
+```
+
+This resolved the previous Spring dependency injection ambiguity caused by multiple `Reasoner` implementations being registered simultaneously.
+
+---
+
+### Key Improvements
+
+#### Centralized Routing Layer
+
+Introduced `ReasonerRouter` as the single active `Reasoner` bean in the Spring context.
+
+Responsibilities:
+
+* strategy routing
+* confidence evaluation
+* fallback orchestration
+* decision audit persistence
+
+---
+
+#### Internalized Reasoning Engines
+
+`AgentReasoner` and `ClaudeReasoner` are no longer directly managed by Spring dependency injection.
+
+This prevents:
+
+* bean ambiguity
+* accidental strategy coupling
+* container-level orchestration conflicts
+
+---
+
+#### Decision Audit Logging
+
+Added persistence for reasoning decisions through:
+
+```
+agent_decision_log
+```
+
+Stored metadata includes:
+
+* action
+* source
+* confidence
+* fallback usage
+* processing latency
+* reasoning explanation
+
+---
+
+### Database Evolution
+
+Hibernate now automatically provisions:
+
+* `event_logs`
+* `agent_decision_log`
+
+This establishes the initial observability foundation for future analytics and intelligence layers.
+
+---
+
+### Validation Achieved
+
+Successfully validated:
+
+* Spring Boot startup stabilization
+* Router-based reasoning orchestration
+* PostgreSQL persistence
+* Decision audit logging
+* End-to-end event pipeline execution
+
+---
+
+### Current Known Issue
+
+The current pipeline still has a request deserialization issue:
+
+```
+type=null
+payload=null
+```
+
+The event request reaches the pipeline, but JSON binding into `AgentEvent` is not yet correctly mapped.
+
+This is the next stabilization target before evolving the observability layer further.
+
+---
+
+

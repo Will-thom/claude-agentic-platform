@@ -1,12 +1,10 @@
 package dev.br.platform.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-@Component
 public class ClaudeReasoner implements Reasoner {
 
     private final WebClient webClient;
@@ -57,7 +55,7 @@ public class ClaudeReasoner implements Reasoner {
         }
 
         Event:
-        """ + event.toString();
+        """ + event;
     }
 
     private LLMDecision parse(String response) {

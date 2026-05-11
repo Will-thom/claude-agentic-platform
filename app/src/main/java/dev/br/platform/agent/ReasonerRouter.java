@@ -1,84 +1,77 @@
 package dev.br.platform.agent;
 
-import dev.br.platform.entity.AgentDecisionLog;
+import dev.br.platform.domain.AgentDecisionLog;
 import dev.br.platform.repository.AgentDecisionLogRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Primary;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
+@Primary
 @Component
 public class ReasonerRouter implements Reasoner {
 
-    private final AgentReasoner agentReasoner;
-    private final ClaudeReasoner claudeReasoner;
-    private final AgentDecisionLogRepository repository;
+	private final AgentReasoner agentReasoner;
+	private final ClaudeReasoner claudeReasoner;
+	private final AgentDecisionLogRepository repository;
 
-    @Value("${agent.reasoning.mode:RULES}")
-    private String mode;
+	@Value("${agent.reasoning.mode:RULES}")
+	private String mode;
 
-    @Value("${agent.reasoning.confidence-threshold:0.8}")
-    private double confidenceThreshold;
+	@Value("${agent.reasoning.confidence-threshold:0.8}")
+	private double confidenceThreshold;
 
-    public ReasonerRouter(AgentReasoner agentReasoner,
-                          ClaudeReasoner claudeReasoner,
-                          AgentDecisionLogRepository repository) {
-        this.agentReasoner = agentReasoner;
-        this.claudeReasoner = claudeReasoner;
-        this.repository = repository;
-    }
+	public ReasonerRouter(AgentDecisionLogRepository repository, WebClient webClient) {
 
-    @Override
-    public AgentDecision decide(Map<String, Object> enrichedEvent) {
+		this.repository = repository;
 
-        long start = System.currentTimeMillis();
+		this.agentReasoner = new AgentReasoner();
+		this.claudeReasoner = new ClaudeReasoner(webClient);
+	}
 
-        String eventType = (String) enrichedEvent.get("type");
+	@Override
+	public AgentDecision decide(Map<String, Object> enrichedEvent) {
 
-        AgentDecision decision;
-        boolean fallbackUsed = false;
+		long start = System.currentTimeMillis();
 
-        if ("CLAUDE".equalsIgnoreCase(mode)) {
+		String eventType = (String) enrichedEvent.get("type");
 
-            AgentDecision aiDecision = claudeReasoner.decide(enrichedEvent);
+		AgentDecision decision;
+		boolean fallbackUsed = false;
 
-            if (aiDecision.getConfidence() >= confidenceThreshold) {
+		// 1. routing strategy
+		if ("CLAUDE".equalsIgnoreCase(mode)) {
 
-                decision = aiDecision;
+			AgentDecision aiDecision = claudeReasoner.decide(enrichedEvent);
 
-            } else {
+			if (aiDecision.getConfidence() >= confidenceThreshold) {
 
-                fallbackUsed = true;
+				decision = aiDecision;
 
-                AgentDecision fallback = agentReasoner.decide(enrichedEvent);
+			} else {
 
-                decision = new AgentDecision(
-                        fallback.getAction(),
-                        fallback.getReason()
-                                + " | fallback from AI confidence="
-                                + aiDecision.getConfidence(),
-                        "HYBRID_FALLBACK",
-                        fallback.getConfidence()
-                );
-            }
+				fallbackUsed = true;
 
-        } else {
+				AgentDecision fallback = agentReasoner.decide(enrichedEvent);
 
-            decision = agentReasoner.decide(enrichedEvent);
-        }
+				decision = new AgentDecision(fallback.getAction(),
+						fallback.getReason() + " | fallback from AI confidence=" + aiDecision.getConfidence(),
+						"HYBRID_FALLBACK", fallback.getConfidence());
+			}
 
-        long duration = System.currentTimeMillis() - start;
+		} else {
 
-        repository.save(new AgentDecisionLog(
-                eventType != null ? eventType : "UNKNOWN",
-                decision.getAction(),
-                decision.getReason(),
-                decision.getSource(),
-                decision.getConfidence(),
-                fallbackUsed,
-                duration
-        ));
+			decision = agentReasoner.decide(enrichedEvent);
+		}
 
-        return decision;
-    }
+		long duration = System.currentTimeMillis() - start;
+
+		// 2. persist audit log
+		repository.save(new AgentDecisionLog(eventType != null ? eventType : "UNKNOWN", decision.getAction(),
+				decision.getReason(), decision.getSource(), decision.getConfidence(), fallbackUsed, duration));
+
+		return decision;
+	}
 }

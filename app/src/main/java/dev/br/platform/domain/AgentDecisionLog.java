@@ -1,4 +1,4 @@
-package dev.br.platform.entity;
+package dev.br.platform.domain;
 
 import jakarta.persistence.*;
 import java.time.Instant;

@@ -1,10 +1,7 @@
 package dev.br.platform.agent;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 
-@Component
 public class AgentReasoner implements Reasoner {
 
     @Override
@@ -12,7 +9,7 @@ public class AgentReasoner implements Reasoner {
 
         String type = (String) enrichedEvent.get("type");
 
-        if (type.contains("ERROR")) {
+        if (type != null && type.contains("ERROR")) {
 
             return new AgentDecision(
                     "ALERT",
@@ -22,7 +19,7 @@ public class AgentReasoner implements Reasoner {
             );
         }
 
-        if (type.contains("ENRICH")) {
+        if (type != null && type.contains("ENRICH")) {
 
             return new AgentDecision(
                     "STORE",
