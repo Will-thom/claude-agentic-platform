@@ -1596,3 +1596,322 @@ This is the next stabilization target before evolving the observability layer fu
 ---
 
 
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ERROR\",\"payload\":\"system failure\"}"
+
+{"id":4,"eventType":"ERROR","message":"{payload=system failure, source=claude-agentic-platform, type=ERROR, timestamp=2026-05-11T13:57:34.615157899Z} | decision=ALERT | reason=Error event detected | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:57:34.769161388"}
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs order by id desc;"
+
+ id |         created_at         | event_type |                                                                                            message
+----+----------------------------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  4 | 2026-05-11 13:57:34.769161 | ERROR      | {payload=system failure, source=claude-agentic-platform, type=ERROR, timestamp=2026-05-11T13:57:34.615157899Z} | decision=ALERT | reason=Error event detected | source=RULES | confidence=1.0
+  3 | 2026-05-11 13:23:26.182099 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:23:25.986338303Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+  2 | 2026-05-11 13:20:10.492711 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:20:10.244106556Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+  1 | 2026-05-11 13:13:01.069183 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+(4 rows)
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from agent_decision_log order by id desc;"
+
+ id | action | confidence |          created_at           | event_type | fallback_used | processing_time_ms |        reason        | source
+----+--------+------------+-------------------------------+------------+---------------+--------------------+----------------------+--------
+  4 | ALERT  |          1 | 2026-05-11 13:57:34.615713+00 | ERROR      | f             |                  0 | Error event detected | RULES
+  3 | IGNORE |          1 | 2026-05-11 13:23:25.989538+00 | UNKNOWN    | f             |                  0 | No relevant action   | RULES
+  2 | IGNORE |          1 | 2026-05-11 13:20:10.248569+00 | UNKNOWN    | f             |                  3 | No relevant action   | RULES
+  1 | IGNORE |          1 | 2026-05-11 13:13:00.191863+00 | UNKNOWN    | f             |                  2 | No relevant action   | RULES
+(4 rows)
+
+
+=============================================
+---
+
+# 📦 1. CURRENT SYSTEM SNAPSHOT
+
+## 🧠 System Type
+
+> **Hybrid Agentic Decision Platform (Spring Boot + Rule Engine + LLM-ready Router + Observability Layer)**
+
+You have a working event-driven reasoning pipeline with pluggable decision strategies and persistence.
+
+---
+
+## ⚙️ VALIDATED END-TO-END PIPELINE
+
+```text
+HTTP Event
+  ↓
+EventLogController
+  ↓
+AgentEvent
+  ↓
+EventPipeline
+  ↓
+EventEnricher
+  ↓
+ReasonerRouter (@Primary)
+  ↓
+AgentReasoner OR ClaudeReasoner
+  ↓
+AgentDecision
+  ↓
+EventLog (audit trail)
+  ↓
+AgentDecisionLog (decision observability)
+```
+
+---
+
+## 🧠 CURRENT CAPABILITIES
+
+### ✔ Event ingestion
+
+* REST endpoint working
+* JSON deserialization fixed
+* clean event pipeline execution
+
+### ✔ Reasoning layer
+
+* RULES engine fully functional
+* LLM (Claude) integration scaffold exists
+* centralized routing via `ReasonerRouter`
+
+### ✔ Observability
+
+* `event_logs` → system audit trail
+* `agent_decision_log` → decision trace + analytics foundation
+
+### ✔ Resilience
+
+* fallback mechanism implemented
+* confidence threshold logic ready
+* hybrid routing structure in place
+
+---
+
+# 🗂️ 2. CURRENT PROJECT STRUCTURE (FILESYSTEM SNAPSHOT)
+
+## 📁 Base package
+
+```
+app/src/main/java/dev/br/platform
+```
+
+---
+
+## 📦 controller
+
+```
+controller/
+ └── EventLogController.java
+```
+
+Responsible for:
+
+* receiving HTTP requests
+* converting payload → `AgentEvent`
+* delegating to pipeline
+
+---
+
+## 📦 events (core pipeline)
+
+```
+events/
+ ├── AgentEvent.java
+ ├── EventPipeline.java
+ └── EventEnricher.java
+```
+
+Responsible for:
+
+* event orchestration
+* enrichment logic
+* main processing pipeline
+
+---
+
+## 📦 agent (decision layer)
+
+```
+agent/
+ ├── Reasoner.java
+ ├── ReasonerRouter.java   (@Primary entry point)
+ ├── AgentReasoner.java    (RULES engine)
+ ├── ClaudeReasoner.java   (LLM engine)
+ ├── AgentDecision.java
+ └── LLMDecision.java
+```
+
+Responsible for:
+
+* decision making abstraction
+* routing logic between strategies
+* LLM integration layer
+
+---
+
+## 📦 domain (persistence models)
+
+```
+domain/
+ ├── EventLog.java
+ └── AgentDecisionLog.java
+```
+
+---
+
+## 📦 repository
+
+```
+repository/
+ ├── EventLogRepository.java
+ └── AgentDecisionLogRepository.java
+```
+
+---
+
+## 📦 service
+
+```
+service/
+ └── EventLogService.java
+```
+
+---
+
+## 🗄️ DATABASE
+
+PostgreSQL: `agentic_db`
+
+### Tables:
+
+* `event_logs` ✔
+* `agent_decision_log` ✔
+
+---
+
+# 🚀 3. ROADMAP TO FINAL SYSTEM
+
+---
+
+# 🧭 PHASE 2 — STRUCTURED DECISION MODEL (NEXT STEP)
+
+## Goal
+
+Replace string-based decision payloads:
+
+```
+message = "... | decision=... | reason=..."
+```
+
+with structured objects.
+
+---
+
+## Introduce:
+
+### ✔ DecisionEnvelope
+
+```json
+{
+  "event": {...},
+  "decision": {...},
+  "metadata": {
+    "latencyMs": 12,
+    "source": "RULES | CLAUDE",
+    "confidence": 0.95
+  },
+  "routingTrace": []
+}
+```
+
+---
+
+## Why this matters
+
+* enables analytics
+* enables replay/debugging
+* removes string concatenation hacks
+* prepares system for multi-agent expansion
+
+---
+
+# 📊 PHASE 3 — OBSERVABILITY LAYER
+
+## Goal
+
+Turn logs into real analytical data.
+
+### Features:
+
+* structured JSON logging
+* decision metrics
+* fallback rate tracking
+* latency analysis
+* RULES vs CLAUDE usage stats
+
+---
+
+# 🧠 PHASE 4 — INTELLIGENCE LAYER
+
+## Goal
+
+Make routing adaptive instead of static.
+
+### Features:
+
+* dynamic confidence threshold tuning
+* learning from past decisions
+* routing optimization logic
+* feedback loop from execution history
+
+---
+
+# 🤖 PHASE 5 — MULTI-AGENT SYSTEM
+
+## Final vision
+
+Evolve into a multi-reasoner system:
+
+* multiple reasoning engines
+* voting or ranking system
+* strategy selection layer
+* dynamic routing based on context
+
+---
+
+# 🧠 CURRENT STATE SUMMARY
+
+You are here:
+
+```
+Phase 1 → COMPLETED
+Stable hybrid reasoning pipeline with observability
+```
+
+### You already have:
+
+✔ working event pipeline
+✔ rule-based reasoning engine
+✔ LLM-ready architecture
+✔ centralized router
+✔ dual persistence model
+✔ fallback-ready design
+
+---
+
+### You still don’t have:
+
+❌ structured decision model
+❌ observability analytics layer
+❌ adaptive routing intelligence
+❌ multi-agent system
+
+---
+
+# 🎯 FINAL NOTE
+
+> a foundational agentic decision system with extensible reasoning architecture
+
+The next step (Phase 2) is where it becomes a **real platform instead of a pipeline**.
+=============================================

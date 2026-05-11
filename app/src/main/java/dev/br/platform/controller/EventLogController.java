@@ -16,13 +16,8 @@ public class EventLogController {
     }
 
     @PostMapping
-    public EventLog create(@RequestBody EventLog event) {
+    public EventLog create(@RequestBody AgentEvent event) {
 
-        AgentEvent agentEvent = new AgentEvent(
-                event.getEventType(),
-                event.getMessage()
-        );
-
-        return pipeline.process(agentEvent);
+        return pipeline.process(event);
     }
 }
