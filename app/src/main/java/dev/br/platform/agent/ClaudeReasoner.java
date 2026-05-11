@@ -1,45 +1,75 @@
 package dev.br.platform.agent;
 
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-@Component
 public class ClaudeReasoner implements Reasoner {
+
+    private final WebClient webClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public ClaudeReasoner(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     @Override
     public AgentDecision decide(Map<String, Object> enrichedEvent) {
 
-        String type = (String) enrichedEvent.get("type");
-        String payload = enrichedEvent.toString();
+        String response = callClaude(enrichedEvent);
 
-        // Simulated LLM prompt reasoning
-        String simulatedResponse = simulateLLM(type, payload);
+        LLMDecision llmDecision = parse(response);
 
-        return parseDecision(simulatedResponse);
+        return new AgentDecision(
+                llmDecision.getAction(),
+                llmDecision.getReason(),
+                "CLAUDE",
+                llmDecision.getConfidence()
+        );
     }
 
-    private String simulateLLM(String type, String payload) {
+    private String callClaude(Map<String, Object> event) {
 
-        // This simulates how a Claude-like model would respond
-        if (type.contains("ERROR")) {
-            return "ACTION=ALERT;REASON=LLM detected critical failure pattern";
-        }
+        String prompt = buildPrompt(event);
 
-        if (type.contains("REASONING")) {
-            return "ACTION=STORE;REASON=LLM classified as structured test event";
-        }
-
-        return "ACTION=STORE;REASON=LLM default classification";
+        return webClient.post()
+                .uri("https://api.anthropic.com/v1/messages")
+                .header("content-type", "application/json")
+                .bodyValue(prompt)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
     }
 
-    private AgentDecision parseDecision(String response) {
+    private String buildPrompt(Map<String, Object> event) {
 
-        String[] parts = response.split(";");
+        return """
+        You are an AI reasoning engine.
 
-        String action = parts[0].split("=")[1];
-        String reason = parts[1].split("=")[1];
+        Analyze the event and return ONLY valid JSON:
+        {
+          "action": "STORE|ALERT|IGNORE",
+          "reason": "short explanation",
+          "confidence": 0.0 to 1.0
+        }
 
-        return new AgentDecision(action, reason);
+        Event:
+        """ + event;
+    }
+
+    private LLMDecision parse(String response) {
+
+        try {
+            return objectMapper.readValue(response, LLMDecision.class);
+
+        } catch (Exception e) {
+
+            return new LLMDecision(
+                    "ERROR",
+                    "Failed to parse LLM response",
+                    0.0
+            );
+        }
     }
 }

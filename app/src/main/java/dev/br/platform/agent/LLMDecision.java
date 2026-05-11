@@ -1,20 +1,16 @@
 package dev.br.platform.agent;
 
-public class AgentDecision {
+public class LLMDecision {
 
     private String action;
     private String reason;
-    private String source;
     private double confidence;
 
-    public AgentDecision(String action,
-                         String reason,
-                         String source,
-                         double confidence) {
+    public LLMDecision() {}
 
+    public LLMDecision(String action, String reason, double confidence) {
         this.action = action;
         this.reason = reason;
-        this.source = source;
         this.confidence = confidence;
     }
 
@@ -26,11 +22,19 @@ public class AgentDecision {
         return reason;
     }
 
-    public String getSource() {
-        return source;
-    }
-
     public double getConfidence() {
         return confidence;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
     }
 }

@@ -107,7 +107,7 @@ This ensures that when AI agents are introduced into the development loop, they 
 
 ```
 
-Visualizing data inside DB docker container (Phase 1):
+End-to-end Test -  DB docker container (Phase 1):
 
 
 Complete Rebuild:
@@ -135,7 +135,7 @@ Resonse awaited:
 }
 
 
-Visualizing data inside DB docker container:
+End-to-end Test -  DB docker container:
 
 
 docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db
@@ -215,7 +215,7 @@ This ensures the system remains:
 ```
 
 
-Visualizing data inside DB docker container (Phase 2):
+End-to-end Test -  DB docker container (Phase 2):
 
 docker compose down
 docker compose up --build
@@ -313,7 +313,7 @@ Future enhancements will include:
 - Event routing strategies
 ```
 
-Visualizing data inside DB docker container (Phase 3):
+End-to-end Test -  DB docker container (Phase 3):
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"PIPELINE_TEST\",\"message\":\"testing event pipeline layer\"}"
 
@@ -400,7 +400,7 @@ Future evolution will introduce:
 ```
 
 
-Visualizing data inside DB docker container (Phase 4):
+End-to-end Test -  DB docker container (Phase 4):
 
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing enrichment layer\"}"
@@ -517,7 +517,7 @@ Future evolution will replace or augment the `AgentReasoner` with:
 ```
 
 
-Visualizing data inside DB docker container (Phase 5):
+End-to-end Test -  DB docker container (Phase 5):
 
 
 curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"ENRICH_TEST\",\"message\":\"testing reasoning layer\"}"
@@ -635,7 +635,7 @@ Future evolution will introduce:
 ```
 
 
-Visualizing data inside DB docker container (Phase 6):
+End-to-end Test -  DB docker container (Phase 6):
 
 docker compose down
 docker compose up --build
@@ -766,7 +766,7 @@ Future evolution will include:
 ```
 
 
-Visualizing data inside DB docker container (Phase 7):
+End-to-end Test -  DB docker container (Phase 7):
 
 
 docker compose down
@@ -896,7 +896,7 @@ This establishes a foundation for:
 
 ```
 
-Visualizing data inside DB docker container (Phase 8):
+End-to-end Test -  DB docker container (Phase 8):
 
 
 docker compose down
@@ -921,3 +921,997 @@ docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select
   7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
   8 | 2026-05-10 20:39:33.996949 | ROUTER_TEST    | testing reasoning switch
 (8 rows)
+
+
+
+
+```
+## 🧠 Phase 9: Structured LLM Output (JSON-Based Reasoning)
+
+The system has evolved from string-based LLM responses to a **fully structured JSON-based reasoning contract**, aligning the architecture with modern LLM integration standards.
+
+---
+
+## 🧭 Updated Architecture Flow
+
+```
+
+HTTP Request
+↓
+Controller (API Layer)
+↓
+Event Pipeline (Orchestration Layer)
+↓
+Event Enricher (Context Augmentation Layer)
+↓
+Reasoner Router (Strategy Layer)
+├── AgentReasoner (Rule-based)
+└── ClaudeReasoner (LLM-based JSON output)
+↓
+Service (Business Logic Layer)
+↓
+Repository (Data Access Layer)
+↓
+PostgreSQL
+
+```
+
+---
+
+## 🧠 Purpose of Structured LLM Output
+
+This phase introduces a **contract-based AI response model**, replacing fragile string parsing with structured JSON.
+
+Key improvements:
+
+- Strong typing for AI outputs
+- Safer parsing and error handling
+- Extensible decision schema
+- Foundation for multi-model AI interoperability
+
+---
+
+## 📦 Current Implementation
+
+### `LLMDecision`
+
+A structured model representing LLM output:
+
+- `action` → system decision (STORE, ALERT, IGNORE)
+- `reason` → explanation from the model
+- `confidence` → AI confidence score (0.0 – 1.0)
+
+---
+
+### `ClaudeReasoner` (Updated)
+
+The reasoner now:
+
+- Builds structured prompts instructing JSON-only output
+- Parses LLM responses into `LLMDecision`
+- Converts structured AI output into internal `AgentDecision`
+- Implements safe fallback in case of parsing errors
+
+---
+
+## ⚙️ Design Intent
+
+This phase aligns the system with **production-grade LLM integration patterns**, enabling:
+
+- Reliable AI response handling
+- Clear separation between prompt and contract
+- Safer evolution toward real Claude API usage
+- Multi-model compatibility (future-ready design)
+
+---
+
+## 🧠 Architectural Direction
+
+The system now treats LLM output as a **structured decision contract**, enabling:
+
+- Deterministic handling of AI responses
+- Confidence-based decision logic (future step)
+- Hybrid reasoning systems (rules + AI arbitration)
+- Observability over AI decisions
+
+Future evolution will include:
+
+- Hybrid reasoning layer (rules vs LLM arbitration)
+- Confidence-based routing
+- Real Claude API integration hardening
+```
+
+
+
+
+````
+## 🧠 Architectural Pause Before Real LLM Integration
+
+At this stage, the project intentionally pauses before integrating a real Claude API connection.
+
+Although the platform already contains:
+
+- A pluggable reasoning architecture
+- Simulated Claude reasoning
+- Structured JSON-based LLM contracts
+- Runtime reasoning strategy selection
+
+the system is not yet considered operationally mature for production-grade AI integration.
+
+---
+
+## ⚙️ Why Real LLM Integration Was Deferred
+
+Connecting an external LLM too early would introduce several architectural risks:
+
+- Opaque decision-making (“black box” behavior)
+- Lack of traceability for AI decisions
+- No confidence arbitration
+- No fallback strategy
+- Difficult debugging and observability
+- Increased operational cost without governance
+
+For this reason, the current focus shifts from:
+
+> “calling an AI model”
+
+to:
+
+> “orchestrating intelligence safely and observably”
+
+---
+
+## 🧠 Current Architectural Understanding
+
+The project now distinguishes between:
+
+### ❌ Simple AI Consumption
+
+Calling an LLM endpoint directly from application code.
+
+### ✅ Agentic Intelligence Orchestration
+
+Managing:
+
+- reasoning strategies
+- confidence evaluation
+- fallback logic
+- observability
+- traceability
+- decision governance
+
+This distinction is foundational for building reliable agentic systems.
+
+---
+
+## 🚀 Next Planned Evolution
+
+Before enabling real Claude integration, the platform will evolve through the following stages:
+
+### 1. Hybrid Reasoning Layer
+
+Introduce arbitration between:
+
+- deterministic rules
+- AI reasoning
+- fallback strategies
+
+Example:
+
+```
+confidence > 0.8 → trust AI
+confidence < 0.5 → fallback to rules
+````
+
+---
+
+### 2. Decision Traceability
+
+Persist metadata such as:
+
+* reasoning source
+* confidence score
+* execution time
+* selected strategy
+* fallback events
+
+---
+
+### 3. Observability Layer
+
+Add operational visibility into the reasoning pipeline:
+
+* structured logs
+* decision audit trails
+* AI execution metrics
+* reasoning diagnostics
+
+---
+
+## 🧭 Strategic Direction
+
+The platform is evolving toward an architecture where:
+
+* intelligence is orchestrated rather than merely consumed
+* AI becomes one reasoning strategy among many
+* system reliability is prioritized before external model dependency
+
+This approach establishes a more robust foundation for future:
+
+* Claude API integration
+* hybrid reasoning systems
+* multi-agent orchestration
+* production-grade AI governance
+
+```
+```
+
+## 🧠 Phase 9: Hybrid Reasoning Layer
+
+This phase introduces the platform's first **hybrid intelligence orchestration layer**, enabling the system to govern AI decisions instead of blindly trusting them.
+
+The architecture now supports:
+
+- confidence-based AI arbitration
+- fallback strategies
+- reasoning source tracking
+- hybrid rule/AI decision flow
+
+This marks the transition from:
+
+> simple LLM consumption
+
+to:
+
+> intelligence orchestration and governance
+
+---
+
+## 🧭 Hybrid Reasoning Flow
+
+```
+
+Enriched Event
+↓
+ReasonerRouter
+↓
+ClaudeReasoner
+↓
+confidence >= threshold ?
+├── YES → accept AI decision
+└── NO  → fallback to AgentReasoner
+
+````
+
+---
+
+## ⚙️ Confidence-Based Arbitration
+
+The platform now evaluates AI confidence before accepting a decision.
+
+### Example
+
+```
+confidence >= 0.8
+→ accept Claude reasoning
+
+confidence < 0.8
+→ fallback to deterministic rules
+````
+
+This introduces operational safety and prepares the system for real-world AI governance scenarios.
+
+---
+
+## 📦 Architectural Changes
+
+### `AgentDecision` evolved
+
+The decision model now contains:
+
+* `action`
+* `reason`
+* `source`
+* `confidence`
+
+This allows the platform to trace:
+
+* where decisions originated
+* how reliable they are
+* whether fallback was triggered
+
+---
+
+### `ReasonerRouter` upgraded
+
+The router now acts as an:
+
+> intelligence arbitration engine
+
+Responsibilities include:
+
+* selecting reasoning strategy
+* evaluating AI confidence
+* triggering fallback logic
+* returning unified decisions
+
+---
+
+### `ClaudeReasoner` evolved
+
+The LLM reasoning layer now:
+
+* produces structured decisions
+* exposes confidence levels
+* integrates with arbitration flow
+
+---
+
+### `AgentReasoner` remains deterministic
+
+The rule-based reasoner now acts as:
+
+* deterministic fallback
+* operational safety layer
+* governance baseline
+
+---
+
+## 🧠 Strategic Importance
+
+This phase establishes the foundation for:
+
+* production-grade AI governance
+* safe LLM adoption
+* explainable reasoning systems
+* hybrid intelligence architectures
+
+The platform no longer treats AI as an isolated service call, but rather as one reasoning strategy within a governed decision ecosystem.
+
+---
+
+## 🚀 Future Evolution
+
+Next planned capabilities include:
+
+* reasoning trace persistence
+* structured observability
+* AI execution metrics
+* decision audit trails
+* adaptive confidence thresholds
+* multi-agent orchestration
+
+
+````
+End-to-end Test -  DB docker container (Phase 9):
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"eventType\":\"HYBRID_TEST\",\"message\":\"testing hybrid reasoning arbitration\"}"
+
+{"id":9,"eventType":"HYBRID_TEST","message":"testing hybrid reasoning arbitration","createdAt":"2026-05-10T21:55:28.346906968"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs;"
+
+ id |         created_at         |   event_type   |               message
+----+----------------------------+----------------+--------------------------------------
+  1 | 2026-05-10 19:00:28.017114 | INIT           | first event stored in postgres
+  2 | 2026-05-10 19:15:20.20684  | SERVICE_TEST   | testing service layer integration
+  3 | 2026-05-10 19:35:27.7447   | PIPELINE_TEST  | testing event pipeline layer
+  4 | 2026-05-10 19:43:38.738173 | ENRICH_TEST    | testing enrichment layer
+  5 | 2026-05-10 19:58:51.467975 | ENRICH_TEST    | testing reasoning layer
+  6 | 2026-05-10 20:14:13.206004 | REASONING_TEST | testing abstraction layer
+  7 | 2026-05-10 20:25:41.714922 | REASONING_TEST | testing claude simulation
+  8 | 2026-05-10 20:39:33.996949 | ROUTER_TEST    | testing reasoning switch
+  9 | 2026-05-10 21:55:28.346907 | HYBRID_TEST    | testing hybrid reasoning arbitration
+(9 rows)
+````
+
+
+## 📊 Phase 10: Decision Trace & Observability Layer
+
+This phase introduces a critical capability in the agentic platform: **full decision observability and auditability**.
+
+The system now not only makes decisions, but also **records and explains every reasoning outcome in a persistent audit trail**.
+
+---
+
+## 🧠 Why This Phase Matters
+
+Until this point, the platform was capable of:
+
+- routing events
+- applying rules
+- invoking LLM reasoning (simulated or real-ready)
+- performing fallback between strategies
+
+However, there was no visibility into:
+
+- why a decision was made
+- which strategy was used
+- whether fallback occurred
+- how long reasoning took
+
+This phase solves that gap.
+
+---
+
+## 🧭 New Capability: Decision Audit Trail
+
+Every decision produced by the `ReasonerRouter` is now persisted as a structured log entry.
+
+### Captured Information
+
+Each decision log includes:
+
+- `eventType` → original event classification
+- `action` → final decision (STORE, ALERT, IGNORE, etc.)
+- `reason` → explanation from reasoning layer
+- `source` → RULES, CLAUDE, or HYBRID_FALLBACK
+- `confidence` → AI confidence score (when applicable)
+- `fallbackUsed` → whether fallback logic was triggered
+- `processingTimeMs` → execution latency of reasoning pipeline
+- `createdAt` → timestamp of decision execution
+
+---
+
+## 🏗️ Architectural Impact
+
+### ReasonerRouter Evolution
+
+The `ReasonerRouter` is now responsible for:
+
+- orchestrating reasoning strategy selection
+- applying confidence-based arbitration
+- triggering fallback logic when necessary
+- recording full decision trace into persistence layer
+
+It effectively becomes:
+
+> a **governed intelligence execution engine with observability**
+
+---
+
+### New Persistence Layer
+
+A new entity has been introduced:
+
+- `AgentDecisionLog`
+
+Stored via:
+
+- `AgentDecisionLogRepository`
+
+Backed by PostgreSQL.
+
+---
+
+## 🔁 Updated Flow
+
+```
+
+Enriched Event
+↓
+ReasonerRouter
+↓
+ClaudeReasoner (if enabled)
+↓
+Confidence Evaluation
+↓
+Fallback (if needed)
+↓
+Final Decision
+↓
+Persist Decision Trace (DB)
+↓
+Return Response
+
+```
+
+---
+
+## 🧠 Strategic Value
+
+This phase transforms the system from:
+
+> “a pipeline that makes decisions”
+
+into:
+
+> “a system that can explain, audit, and measure its own intelligence”
+
+Key benefits:
+
+- full reasoning traceability
+- production-grade observability for AI behavior
+- debugging support for hybrid decision systems
+- foundation for AI governance and evaluation metrics
+
+---
+
+## 🚀 Next Evolution Direction
+
+With observability in place, the platform is now ready for:
+
+- Decision analytics (AI vs rules effectiveness)
+- Confidence tuning strategies
+- Behavioral drift detection
+- Real Claude API integration with monitoring
+- Agent performance dashboards
+```
+
+
+🧪 TESTE 1 — RULES FLOW 
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ERROR\",\"payload\":\"system failure\"}"
+
+{"id":1,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:13:01.069182697"}
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs order by id desc;"
+
+ id |         created_at         | event_type |                                                                                      message
+----+----------------------------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  1 | 2026-05-11 13:13:01.069183 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+(1 row)
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from agent_decision_log order by id desc;"
+
+ id | action | confidence |          created_at           | event_type | fallback_used | processing_time_ms |       reason       | source
+----+--------+------------+-------------------------------+------------+---------------+--------------------+--------------------+--------
+  1 | IGNORE |          1 | 2026-05-11 13:13:00.191863+00 | UNKNOWN    | f             |                  2 | No relevant action | RULES
+(1 row)
+
+
+🧪 TESTE 2 — evento normal:
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"NORMAL\",\"payload\":\"regular event\"}"
+
+{"id":2,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:20:10.244106556Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:20:10.492710926"}
+
+
+🧪 TESTE 3 — ENRICH FLOW:
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ENRICH\",\"payload\":\"metadata enrichment\"}"
+
+{"id":3,"eventType":null,"message":"{payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:23:25.986338303Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:23:26.182099096"}
+
+
+
+## Phase 10: Hybrid Reasoning Router Stabilization
+
+### Overview
+
+This phase finalized the stabilization of the hybrid reasoning architecture by introducing a centralized routing layer responsible for orchestrating decision strategies across the event pipeline.
+
+The system now supports a clean separation between:
+
+* deterministic rule-based reasoning
+* AI-driven reasoning (Claude integration ready)
+* routing and fallback orchestration
+* decision observability persistence
+
+---
+
+### Architecture Evolution
+
+The reasoning flow is now centralized through a single orchestration component:
+
+```text id="m1"
+EventPipeline
+   ↓
+ReasonerRouter
+   ↓
+AgentReasoner OR ClaudeReasoner
+   ↓
+AgentDecision
+```
+
+This resolved the previous Spring dependency injection ambiguity caused by multiple `Reasoner` implementations being registered simultaneously.
+
+---
+
+### Key Improvements
+
+#### Centralized Routing Layer
+
+Introduced `ReasonerRouter` as the single active `Reasoner` bean in the Spring context.
+
+Responsibilities:
+
+* strategy routing
+* confidence evaluation
+* fallback orchestration
+* decision audit persistence
+
+---
+
+#### Internalized Reasoning Engines
+
+`AgentReasoner` and `ClaudeReasoner` are no longer directly managed by Spring dependency injection.
+
+This prevents:
+
+* bean ambiguity
+* accidental strategy coupling
+* container-level orchestration conflicts
+
+---
+
+#### Decision Audit Logging
+
+Added persistence for reasoning decisions through:
+
+```
+agent_decision_log
+```
+
+Stored metadata includes:
+
+* action
+* source
+* confidence
+* fallback usage
+* processing latency
+* reasoning explanation
+
+---
+
+### Database Evolution
+
+Hibernate now automatically provisions:
+
+* `event_logs`
+* `agent_decision_log`
+
+This establishes the initial observability foundation for future analytics and intelligence layers.
+
+---
+
+### Validation Achieved
+
+Successfully validated:
+
+* Spring Boot startup stabilization
+* Router-based reasoning orchestration
+* PostgreSQL persistence
+* Decision audit logging
+* End-to-end event pipeline execution
+
+---
+
+### Current Known Issue
+
+The current pipeline still has a request deserialization issue:
+
+```
+type=null
+payload=null
+```
+
+The event request reaches the pipeline, but JSON binding into `AgentEvent` is not yet correctly mapped.
+
+This is the next stabilization target before evolving the observability layer further.
+
+---
+
+
+curl -X POST http://localhost:18080/events -H "Content-Type: application/json" -d "{\"type\":\"ERROR\",\"payload\":\"system failure\"}"
+
+{"id":4,"eventType":"ERROR","message":"{payload=system failure, source=claude-agentic-platform, type=ERROR, timestamp=2026-05-11T13:57:34.615157899Z} | decision=ALERT | reason=Error event detected | source=RULES | confidence=1.0","createdAt":"2026-05-11T13:57:34.769161388"}
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from event_logs order by id desc;"
+
+ id |         created_at         | event_type |                                                                                            message
+----+----------------------------+------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  4 | 2026-05-11 13:57:34.769161 | ERROR      | {payload=system failure, source=claude-agentic-platform, type=ERROR, timestamp=2026-05-11T13:57:34.615157899Z} | decision=ALERT | reason=Error event detected | source=RULES | confidence=1.0
+  3 | 2026-05-11 13:23:26.182099 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:23:25.986338303Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+  2 | 2026-05-11 13:20:10.492711 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:20:10.244106556Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+  1 | 2026-05-11 13:13:01.069183 |            | {payload=null, source=claude-agentic-platform, type=null, timestamp=2026-05-11T13:13:00.187313582Z} | decision=IGNORE | reason=No relevant action | source=RULES | confidence=1.0
+(4 rows)
+
+
+docker exec -it claude-agentic-postgres psql -U agentic -d agentic_db -c "select * from agent_decision_log order by id desc;"
+
+ id | action | confidence |          created_at           | event_type | fallback_used | processing_time_ms |        reason        | source
+----+--------+------------+-------------------------------+------------+---------------+--------------------+----------------------+--------
+  4 | ALERT  |          1 | 2026-05-11 13:57:34.615713+00 | ERROR      | f             |                  0 | Error event detected | RULES
+  3 | IGNORE |          1 | 2026-05-11 13:23:25.989538+00 | UNKNOWN    | f             |                  0 | No relevant action   | RULES
+  2 | IGNORE |          1 | 2026-05-11 13:20:10.248569+00 | UNKNOWN    | f             |                  3 | No relevant action   | RULES
+  1 | IGNORE |          1 | 2026-05-11 13:13:00.191863+00 | UNKNOWN    | f             |                  2 | No relevant action   | RULES
+(4 rows)
+
+
+=============================================
+---
+
+# 📦 1. CURRENT SYSTEM SNAPSHOT
+
+## 🧠 System Type
+
+> **Hybrid Agentic Decision Platform (Spring Boot + Rule Engine + LLM-ready Router + Observability Layer)**
+
+You have a working event-driven reasoning pipeline with pluggable decision strategies and persistence.
+
+---
+
+## ⚙️ VALIDATED END-TO-END PIPELINE
+
+```text
+HTTP Event
+  ↓
+EventLogController
+  ↓
+AgentEvent
+  ↓
+EventPipeline
+  ↓
+EventEnricher
+  ↓
+ReasonerRouter (@Primary)
+  ↓
+AgentReasoner OR ClaudeReasoner
+  ↓
+AgentDecision
+  ↓
+EventLog (audit trail)
+  ↓
+AgentDecisionLog (decision observability)
+```
+
+---
+
+## 🧠 CURRENT CAPABILITIES
+
+### ✔ Event ingestion
+
+* REST endpoint working
+* JSON deserialization fixed
+* clean event pipeline execution
+
+### ✔ Reasoning layer
+
+* RULES engine fully functional
+* LLM (Claude) integration scaffold exists
+* centralized routing via `ReasonerRouter`
+
+### ✔ Observability
+
+* `event_logs` → system audit trail
+* `agent_decision_log` → decision trace + analytics foundation
+
+### ✔ Resilience
+
+* fallback mechanism implemented
+* confidence threshold logic ready
+* hybrid routing structure in place
+
+---
+
+# 🗂️ 2. CURRENT PROJECT STRUCTURE (FILESYSTEM SNAPSHOT)
+
+## 📁 Base package
+
+```
+app/src/main/java/dev/br/platform
+```
+
+---
+
+## 📦 controller
+
+```
+controller/
+ └── EventLogController.java
+```
+
+Responsible for:
+
+* receiving HTTP requests
+* converting payload → `AgentEvent`
+* delegating to pipeline
+
+---
+
+## 📦 events (core pipeline)
+
+```
+events/
+ ├── AgentEvent.java
+ ├── EventPipeline.java
+ └── EventEnricher.java
+```
+
+Responsible for:
+
+* event orchestration
+* enrichment logic
+* main processing pipeline
+
+---
+
+## 📦 agent (decision layer)
+
+```
+agent/
+ ├── Reasoner.java
+ ├── ReasonerRouter.java   (@Primary entry point)
+ ├── AgentReasoner.java    (RULES engine)
+ ├── ClaudeReasoner.java   (LLM engine)
+ ├── AgentDecision.java
+ └── LLMDecision.java
+```
+
+Responsible for:
+
+* decision making abstraction
+* routing logic between strategies
+* LLM integration layer
+
+---
+
+## 📦 domain (persistence models)
+
+```
+domain/
+ ├── EventLog.java
+ └── AgentDecisionLog.java
+```
+
+---
+
+## 📦 repository
+
+```
+repository/
+ ├── EventLogRepository.java
+ └── AgentDecisionLogRepository.java
+```
+
+---
+
+## 📦 service
+
+```
+service/
+ └── EventLogService.java
+```
+
+---
+
+## 🗄️ DATABASE
+
+PostgreSQL: `agentic_db`
+
+### Tables:
+
+* `event_logs` ✔
+* `agent_decision_log` ✔
+
+---
+
+# 🚀 3. ROADMAP TO FINAL SYSTEM
+
+---
+
+# 🧭 PHASE 2 — STRUCTURED DECISION MODEL (NEXT STEP)
+
+## Goal
+
+Replace string-based decision payloads:
+
+```
+message = "... | decision=... | reason=..."
+```
+
+with structured objects.
+
+---
+
+## Introduce:
+
+### ✔ DecisionEnvelope
+
+```json
+{
+  "event": {...},
+  "decision": {...},
+  "metadata": {
+    "latencyMs": 12,
+    "source": "RULES | CLAUDE",
+    "confidence": 0.95
+  },
+  "routingTrace": []
+}
+```
+
+---
+
+## Why this matters
+
+* enables analytics
+* enables replay/debugging
+* removes string concatenation hacks
+* prepares system for multi-agent expansion
+
+---
+
+# 📊 PHASE 3 — OBSERVABILITY LAYER
+
+## Goal
+
+Turn logs into real analytical data.
+
+### Features:
+
+* structured JSON logging
+* decision metrics
+* fallback rate tracking
+* latency analysis
+* RULES vs CLAUDE usage stats
+
+---
+
+# 🧠 PHASE 4 — INTELLIGENCE LAYER
+
+## Goal
+
+Make routing adaptive instead of static.
+
+### Features:
+
+* dynamic confidence threshold tuning
+* learning from past decisions
+* routing optimization logic
+* feedback loop from execution history
+
+---
+
+# 🤖 PHASE 5 — MULTI-AGENT SYSTEM
+
+## Final vision
+
+Evolve into a multi-reasoner system:
+
+* multiple reasoning engines
+* voting or ranking system
+* strategy selection layer
+* dynamic routing based on context
+
+---
+
+# 🧠 CURRENT STATE SUMMARY
+
+You are here:
+
+```
+Phase 1 → COMPLETED
+Stable hybrid reasoning pipeline with observability
+```
+
+### You already have:
+
+✔ working event pipeline
+✔ rule-based reasoning engine
+✔ LLM-ready architecture
+✔ centralized router
+✔ dual persistence model
+✔ fallback-ready design
+
+---
+
+### You still don’t have:
+
+❌ structured decision model
+❌ observability analytics layer
+❌ adaptive routing intelligence
+❌ multi-agent system
+
+---
+
+# 🎯 FINAL NOTE
+
+> a foundational agentic decision system with extensible reasoning architecture
+
+The next step (Phase 2) is where it becomes a **real platform instead of a pipeline**.
+=============================================

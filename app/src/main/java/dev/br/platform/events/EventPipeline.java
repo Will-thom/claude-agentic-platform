@@ -28,13 +28,15 @@ public class EventPipeline {
         // 1. Enrich event with metadata
         Map<String, Object> enriched = enricher.enrich(event);
 
-        // 2. Apply reasoning (pluggable implementation)
+        // 2. Apply reasoning (Router will resolve strategy internally)
         AgentDecision decision = reasoner.decide(enriched);
 
-        // 3. Compose final payload (temporary simple representation)
-        String finalPayload = enriched.toString() +
-                " | decision=" + decision.getAction() +
-                " | reason=" + decision.getReason();
+        // 3. Compose final payload
+        String finalPayload = enriched.toString()
+                + " | decision=" + decision.getAction()
+                + " | reason=" + decision.getReason()
+                + " | source=" + decision.getSource()
+                + " | confidence=" + decision.getConfidence();
 
         // 4. Persist event
         return service.create(event.getType(), finalPayload);

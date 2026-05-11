@@ -2,6 +2,22 @@ spring:
   application:
     name: claude-agentic-platform
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/agentic_db
+    username: agentic
+    password: agentic
+    driver-class-name: org.postgresql.Driver
+
 agent:
   reasoning:
     mode: RULES
+    confidence-threshold: 0.8
+
+claude:
+  api:
+    key: YOUR_API_KEY_HERE
